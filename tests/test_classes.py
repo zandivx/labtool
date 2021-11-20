@@ -54,8 +54,14 @@ def student_array():
     lt.plt.show()
 
 
+def student_nested():
+    stud = lt.Student(range(23))
+    lst = [stud]*5
+    print(lst)
+
+
 def main():
-    student()
+    student_nested()
 
 
 if __name__ == "__main__":

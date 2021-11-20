@@ -10,7 +10,7 @@ __all__ = ["display", "init", "undo"]
 
 # std lib
 from importlib import reload
-from math import ceil
+from math import ceil, sqrt
 
 # 3rd party
 import uncertainties.core as uc
@@ -31,13 +31,8 @@ def display() -> None:
         return dig, s
 
     def new__repr__(self) -> str:
-        """A modified version of uncertainties.core.Variable.__repr__"""
-        if self.tag is None:
-            return uc.AffineScalarFunc.__str__(self)
-        else:
-            return f"< {self.tag} = {uc.AffineScalarFunc.__repr__(self)} >"
-
-    #old__format__ = _copy_func(uc.AffineScalarFunc.__format__)
+        """A modified version of uncertainties.core.AffineScalarFunc.__repr__"""
+        return uc.AffineScalarFunc.__str__(self)
 
     # ufloat is a factory function with return type uncertainties.core.Variable
     # which inherits from uncertainties.core.AffineScalarFunc
@@ -46,15 +41,8 @@ def display() -> None:
     # therefore changing the behavior of that function changes the way ufloats are diplayed
     uc.PDG_precision = EPM_precision
 
-    # uncertainties.unumpy.core.uarray is a factory function which vectorizes uncertainties.core.Variable (__init__)
-    # however class Variable does not have __str__ defined, but __repr__ instead, which just plain prints the input
-    # -> change __repr__ to more sophisticated behavior of uncertainties.core.AffineScalarFunc.__str__
-    uc.Variable.__repr__ = new__repr__
-    # easier way if tag functionality can be omitted completely:
-    # uc.Variable.__repr__ = uc.AffineScalarFunc.__str__
-
-    # possible patch in future
-    #uc.AffineScalarFunc.__format__ = new__format__
+    uc.AffineScalarFunc.__repr__ = new__repr__
+    #! AffineScalarFunc.std_dev does NOT return the printed value, instead std_dev has all digits
 
     return None
 
