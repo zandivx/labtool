@@ -2,7 +2,7 @@
 
 # dunders
 __author__ = "Andreas Zach"
-__version__ = "0.1.2"
+__version__ = "0.2.1"
 
 try:
     # 3rd party library imports
@@ -30,5 +30,5 @@ else:
     del cls_all, func_all
 
     # apply monkey patches
-    monkeypatch_uncertainties.init()
     monkeypatch_uncertainties.display()
+    # monkeypatch_uncertainties.init()

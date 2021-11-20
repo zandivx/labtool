@@ -10,7 +10,8 @@ from typing import Callable, Union
 
 # 3rd party
 from matplotlib import pyplot as plt
-from numpy import array, diag, linspace, max, min, mean, ndarray, sqrt
+from matplotlib.figure import Figure
+from numpy import array, diag, linspace, max, min, mean, sqrt
 from numpy.typing import ArrayLike
 from pandas import DataFrame
 from scipy.interpolate import interp1d
@@ -20,7 +21,7 @@ from uncertainties import ufloat
 from uncertainties.unumpy import uarray
 
 # own
-from .functions import cd, separate_uarray
+from .functions import cd, separate_uarray, plt_uplot
 
 
 class CDContxt:
@@ -92,6 +93,9 @@ class AbstractFit:
     def __len__(self):
         return len(self.x_in)
 
+    def __repr__(self):
+        return f"<AbstractFit(x_in=[{self.x_in[0]}-{self.x_in[-1]}],y_in=[{self.y_in[0]}-{self.y_in[-1]}])>"
+
     def plot(self,
              style_in: str = "-",
              style_out: str = "-",
@@ -99,23 +103,24 @@ class AbstractFit:
              label_out: str = "Data out",
              title: Union[str, None] = None,
              **kwargs,
-             ):  # TODO: return type
-        """Plot AbstractFit instance. Transmit kwargs to pyplot in
-        the style of method: value
+             ) -> Figure:
+        """Plot AbstractFit instance. Provide kwargs dictionary to pyplot
+        in the style of {method: value, }
+        Create a new figure and return it.
         """
 
         # plot data
-        fig, ax = plt.subplots()
-        ax.plot(self.x_in, self.y_in, style_in, label=label_in)
-        ax.plot(self.x_out, self.y_out, style_out, label=label_out)
+        fig = plt.figure("AbstractFit")
+        plt.plot(self.x_in, self.y_in, style_in, label=label_in)
+        plt.plot(self.x_out, self.y_out, style_out, label=label_out)
 
         # check title
         title = title if title is not None else self._type
 
         # additional calls to pyplot
-        _plot(fig, ax, title=title, **kwargs)
+        _plot(fig, title=title, **kwargs)
 
-        return fig, ax
+        return fig
 
     def save(self, path: str) -> None:
         """Save fit to a file"""
@@ -155,7 +160,7 @@ class CurveFit(AbstractFit):
         -> y_out\ty data output (fit_function(x_out))
         -> p\tcalculated parameters of f
         -> u\tuncertainties of the parameter
-        -> pu\tuarray with ufloats
+        -> pu\tuarray with parameters and uncertainties
         -> df\tpandas.DataFrame with parameter names, nominal values and uncertainites
         -> _p_names\tnames of the parameters p in definition of function f
 
@@ -187,6 +192,9 @@ class CurveFit(AbstractFit):
 
         return f"Fit parameters:\n\nufloats:\n{self.df}\n\nprecisely:\n{precise_df}"
 
+    def __repr__(self):
+        return f"<CurveFit({self._p_names})>"
+
 
 class Interpolation(AbstractFit):
     """A class for interpolations with scipy.interpolate.interp1d"""
@@ -215,6 +223,9 @@ class Interpolation(AbstractFit):
         super().__init__(x, y, lambda x: f(x), divisions, type_="Interpolation")
         self.data = DataFrame({"x": self.x_out, "y": self.y_out})
 
+    def __repr__(self):
+        return f"<Interpolation(x_in=[{self.x_in[0]}-{self.x_in[-1]}],y_in=[{self.y_in[0]}-{self.y_in[-1]}])>"
+
 
 class Student:
     """A class for Student-t distributions.
@@ -226,11 +237,12 @@ class Student:
     # class attributes
 
     # from "Einführung in die physikalischen Messmethoden": S.7, Tabelle 2"
-    # _t_df_old = DataFrame({"N": [2, 3, 4, 5, 6, 8, 10, 20, 30, 50, 100, 200],
-    #                        "1": [1.84, 1.32, 1.20, 1.15, 1.11, 1.08, 1.06, 1.03, 1.02, 1.01, 1.00, 1.00],
-    #                        "2": [13.97, 4.53, 3.31, 2.87, 2.65, 2.43, 2.32, 2.14, 2.09, 2.05, 2.03, 2.01],
-    #                        "3": [235.8, 19.21, 9.22, 6.62, 5.51, 4.53, 4.09, 3.45, 3.28, 3.16, 3.08, 3.04]})
+    # t_df_old = DataFrame({"N": [2, 3, 4, 5, 6, 8, 10, 20, 30, 50, 100, 200],
+    #                       "1": [1.84, 1.32, 1.20, 1.15, 1.11, 1.08, 1.06, 1.03, 1.02, 1.01, 1.00, 1.00],
+    #                       "2": [13.97, 4.53, 3.31, 2.87, 2.65, 2.43, 2.32, 2.14, 2.09, 2.05, 2.03, 2.01],
+    #                       "3": [235.8, 19.21, 9.22, 6.62, 5.51, 4.53, 4.09, 3.45, 3.28, 3.16, 3.08, 3.04]})
 
+    # completed the above data by interpolating with labtool.Interpolation
     t_df = DataFrame({"1": [1.84, 1.32, 1.2, 1.15, 1.11, 1.09, 1.08, 1.07, 1.06, 1.051, 1.045, 1.04, 1.036,
                             1.033, 1.032, 1.031, 1.03, 1.03, 1.03, 1.03, 1.029, 1.028, 1.027, 1.026, 1.025,
                             1.024, 1.022, 1.021, 1.02, 1.019, 1.018, 1.017, 1.016, 1.016, 1.015, 1.014, 1.014,
@@ -273,6 +285,7 @@ class Student:
         except KeyError:
             self.t = sigma
 
+        # raw input series
         self.series = array(series)
 
         # precise n (no rounding by uncertainties)
@@ -282,10 +295,13 @@ class Student:
         self._s = sem(self.series)
 
         # ufloat mean (rounded by uncertainties)
+        # with .n and .s for convenience
         self.mean = ufloat(self._n, self.t*self._s)
+        self.n = self.mean.n
+        self.s = self.mean.s
 
         # check if t is neglibible
-        self._factor_used = True if self.mean.s != self._s else False
+        self._factor_used = True if self.s != self._s else False
 
     def __str__(self):
         ret = (f"Student-t distribution\n\n"
@@ -316,7 +332,7 @@ class StudentArray:
     """A class for Student-t-distributions in every point over multiple arrays"""
 
     def __init__(self,
-                 *series: ArrayLike,
+                 *series,
                  sigma: int = 1,
                  ):
         """Attributes:
@@ -326,18 +342,16 @@ class StudentArray:
         -> s
         """
 
-        # check if provided tuple is already ArrayLike
-        if len(series) == 1:
-            data = array(series[0])
-        else:
-            data = array(*series).T  # type: ignore
+        # check if provided tuple has only one entry
+        # therefore this one entry should already be ArrayLike
+        series = series[0] if len(series) == 1 else series
 
         # initialize DataFrame
-        self.raw_data = DataFrame(data, index=range(len(series)))
+        self.raw_data = DataFrame({i: v for i, v in enumerate(series)})  # type: ignore
 
         # create uarray
-        student = self.raw_data.apply(lambda x: Student(x, sigma), axis=1)
-        self.array = array([x.mean for x in student])
+        students = self.raw_data.apply(lambda x: Student(x, sigma), axis=1)
+        self.array = array([x.mean for x in students])
 
         # create n and s arrays
         self.n, self.s = separate_uarray(self.array)
@@ -352,9 +366,44 @@ class StudentArray:
     def __getitem__(self, key):
         return self.array[key]
 
+    def __repr__(self):
+        return f"<StudentArray(len={len(self)})>"
 
-def _plot(fig, ax, **kwargs) -> None:
+    def plot(self,
+             x: ArrayLike,
+             *args,
+             label: str = "Data with error band",
+             title: Union[str, None] = None,
+             kwargs_uplot: dict = {},
+             **kwargs) -> Figure:
+        """Plot the StudentArray with labtool.plt_uplot
+        kwargs_uplot is provided to labtool.plt_uplot
+        kwargs are provided to pyplot in the style of {method: value, }
+
+        -> x\tdata on x axis to the computed StudentArray
+        """
+
+        # set new current figure
+        fig = plt.figure("StudentArray")
+
+        # uplot self.array over x
+        plt_uplot(x, self, *args, label=label, **kwargs_uplot)  # type: ignore
+
+        # check title
+        title = title if title is not None else "StudentArray"
+
+        # additional calls to pyplot
+        _plot(fig, title=title, **kwargs)
+
+        # return created figure
+        return fig
+
+
+def _plot(fig, **kwargs) -> None:
     """Wrapper for pyplot calls"""
+
+    # set provided figure as current
+    plt.figure(fig)
 
     # standard value = True
     for key in {"legend", "grid", "show"}:
@@ -367,9 +416,9 @@ def _plot(fig, ax, **kwargs) -> None:
             continue
         elif type(value) is bool:  # catch all booleans
             if value:  # only if True
-                ax.__dict__[key]()
+                plt.__dict__[key]()
         else:
-            ax.__dict__[key](value)
+            plt.__dict__[key](value)
 
     # show must be last one to be called
     if kwargs["show"]:

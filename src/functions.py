@@ -214,7 +214,7 @@ def tracer(frame, event, arg):
 def plt_uplot(x: ArrayLike,
               y: ArrayLike,
               *args,
-              band: bool = False,
+              band: bool = True,
               kwfill: dict = {},
               **kwargs,
               ) -> ItDepends:

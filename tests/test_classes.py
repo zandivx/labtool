@@ -13,8 +13,11 @@ def fit():
 
     fit = lt.CurveFit(func, xdata, ydata)
     print(fit)
-    fit.save("saves/fit.csv")
-    fit.plot()
+    # fit.save("saves/fit.csv")
+    fit.plot(show=False)
+    lt.plt.plot(lt.np.linspace(0, 4, 10)**2)
+    # print(lt.plt.gcf())
+    lt.plt.show()
 
 
 # @lt.profile
@@ -41,6 +44,7 @@ def interpolate():
 
 def student_array():
     lst = []
+    x = 0
     for i in range(5):
         if i == 0:
             x = lt.pd.read_csv(f"data/{i}.csv", names=["x", "0"]).iloc[:, 0]
@@ -50,8 +54,9 @@ def student_array():
     sa = lt.StudentArray(lst)
     print(lt.np.array(sa))
     print(sa.n)
-    lt.plt_uplot(x, sa, band=True)  # type: ignore
-    lt.plt.show()
+    # lt.plt_uplot(x, sa, band=True)  # type: ignore
+    # lt.plt.show()
+    sa.plot(x)
 
 
 def student_nested():
@@ -61,7 +66,7 @@ def student_nested():
 
 
 def main():
-    student_nested()
+    student_array()
 
 
 if __name__ == "__main__":
