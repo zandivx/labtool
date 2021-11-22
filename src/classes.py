@@ -347,7 +347,11 @@ class StudentArray:
         series = series[0] if len(series) == 1 else series
 
         # initialize DataFrame
-        self.raw_data = DataFrame({i: v for i, v in enumerate(series)})  # type: ignore
+        # skip if it is already a DataFrame
+        if isinstance(series, DataFrame):
+            self.raw_data = series
+        else:
+            self.raw_data = DataFrame({i: v for i, v in enumerate(series)})  # type: ignore
 
         # create uarray
         students = self.raw_data.apply(lambda x: Student(x, sigma), axis=1)

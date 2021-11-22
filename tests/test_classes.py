@@ -59,6 +59,26 @@ def student_array():
     sa.plot(x)
 
 
+# TODO:
+def student_array_2():
+    df_ges = lt.pd.DataFrame()
+    for i in (0, 6):
+        name = f"{i}_ref"
+        df_ges["lambda"] = lt.pd.read_csv(
+            f'data/3/{name}.csv').iloc[973:2729, 0]
+        df_ges[name] = lt.pd.read_csv(f'data/3/{name}.csv').iloc[973:2729, 1]
+    for i in range(1, 6):
+        name = f"{i}_meth"
+        df_ges[name] = lt.pd.read_csv(f'data/3/{name}.csv').iloc[973:2729, 1]
+
+    print(df_ges)
+
+    student_meth = df_ges.iloc[:, 3:]
+    st_arr = lt.StudentArray(student_meth)
+    print(st_arr)
+    # st_arr.plot(df_ges["lambda"])
+
+
 def student_nested():
     stud = lt.Student(range(23))
     lst = [stud]*5
@@ -66,7 +86,7 @@ def student_nested():
 
 
 def main():
-    student_array()
+    student_array_2()
 
 
 if __name__ == "__main__":
