@@ -2,7 +2,7 @@
 
 # dunders
 __author__ = "Andreas Zach"
-__all__ = ["CDContxt", "CurveFit", "Interpolation", "Student", "StudentArray"]
+__all__ = ["CDContxt", "CurveFit", "Interpolate", "Student", "StudentArray"]
 
 # std library
 from os import chdir, getcwd
@@ -196,7 +196,7 @@ class CurveFit(AbstractFit):
         return f"<CurveFit({self._p_names})>"
 
 
-class Interpolation(AbstractFit):
+class Interpolate(AbstractFit):
     """A class for interpolations with scipy.interpolate.interp1d"""
 
     def __init__(self,
@@ -220,11 +220,13 @@ class Interpolation(AbstractFit):
         -> save
         """
         f = interp1d(x, y, **kwargs)
-        super().__init__(x, y, lambda x: f(x), divisions, type_="Interpolation")
+        super().__init__(x, y, lambda x: f(x), divisions, type_="Interpolate")
         self.data = DataFrame({"x": self.x_out, "y": self.y_out})
 
     def __repr__(self):
-        return f"<Interpolation(x_in=[{self.x_in[0]}-{self.x_in[-1]}],y_in=[{self.y_in[0]}-{self.y_in[-1]}])>"
+        ret = (f"<Interpolate(x_in=[{self.x_in[0]:.3f}-{self.x_in[-1]:.3f}],"
+               f"y_in=[{self.y_in[0]:.3f}-{self.y_in[-1]:.3f}])>")
+        return ret
 
 
 class Student:
@@ -242,7 +244,7 @@ class Student:
     #                       "2": [13.97, 4.53, 3.31, 2.87, 2.65, 2.43, 2.32, 2.14, 2.09, 2.05, 2.03, 2.01],
     #                       "3": [235.8, 19.21, 9.22, 6.62, 5.51, 4.53, 4.09, 3.45, 3.28, 3.16, 3.08, 3.04]})
 
-    # completed the above data by interpolating with labtool.Interpolation
+    # completed the above data by interpolating with labtool.Interpolate
     t_df = DataFrame({"1": [1.84, 1.32, 1.2, 1.15, 1.11, 1.09, 1.08, 1.07, 1.06, 1.051, 1.045, 1.04, 1.036,
                             1.033, 1.032, 1.031, 1.03, 1.03, 1.03, 1.03, 1.029, 1.028, 1.027, 1.026, 1.025,
                             1.024, 1.022, 1.021, 1.02, 1.019, 1.018, 1.017, 1.016, 1.016, 1.015, 1.014, 1.014,
@@ -311,7 +313,7 @@ class Student:
         return ret
 
     def __repr__(self):
-        return f"<Student({self.mean}, t={self.t})>"
+        return f"<Student({self.mean},t={self.t})>"
 
     def __len__(self):
         return len(self.series)

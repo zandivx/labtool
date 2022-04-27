@@ -1,8 +1,11 @@
-"""A python library for LU Experimentalphysik 2"""
+"""
+A python library for scientific protocols at Technical University of Graz
+GitHub: https://github.com/zandivx/labtool
+"""
 
 # dunders
 __author__ = "Andreas Zach"
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 try:
     # 3rd party library imports

@@ -31,13 +31,14 @@ def cd() -> None:
 
 
 def plt_latex() -> None:
-    """Use LaTeX as backend for matplotlib, set figure for a textwidth of 15 cm"""
+    """Use LaTeX as text processor for matplotlib, set figsize for a textwidth of 15 cm"""
     cm = 1/2.54  # conversion factor inch to cm
     rcParams.update({
         "text.usetex": True,
         "text.latex.preamble": r"\usepackage{lmodern}\usepackage{siunitx}",
         "font.family": "Latin Modern Roman",
         "figure.figsize": (15*cm, 9*cm),  # 15:9 relation
+        "figure.autolayout": True,  # auto tight_layout()
     })
     return None
 
