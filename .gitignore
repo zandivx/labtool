@@ -12,6 +12,9 @@
 # venv
 /.venv/
 
+# egg
+/*.egg-info
+
 
 
 
