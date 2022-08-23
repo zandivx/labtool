@@ -1,0 +1,15 @@
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+
+[build-system]
+requires = ["setuptools>=40.8.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "labtool"
+version = "0.3"
+description = "A package for analysis of laboratory data at TU Graz"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "Andreas Zach", email = "andreas.zach@student.tugraz.at" }]
+dependencies = ["matplotlib", "numpy", "pandas", "scipy", "uncertainties"]

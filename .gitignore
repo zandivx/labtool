@@ -1,14 +1,16 @@
 ## Python
 
 # pycache
-**/__pycache__
+**/__pycache__/
 
 # mypy
-**/.mypy_cache
+**/.mypy_cache/
 
 # vscode
-**/.vscode
+/.vscode/
 
+# venv
+/.venv/
 
 
 

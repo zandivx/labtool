@@ -1,4 +1,5 @@
-"""Monkey patches for package 'uncertainties':
+"""
+Monkey patches for package 'uncertainties':
 
 Uncertainties: a Python package for calculations with uncertainties,
 Eric O. LEBIGOT, http://pythonhosted.org/uncertainties/
@@ -57,11 +58,10 @@ def init() -> None:
         n = round(nominal_value, -exponent) if s else nominal_value
         return n, s
 
-    def new__init__(self, value, std_dev, tag=None):
+    def new__init__(self, value, std_dev, tag=None) -> None:
         """A modified version of uncertainties.core.Variable.__init__"""
         value, self.std_dev = round_n_s(value, std_dev)
-        uc.AffineScalarFunc.__init__(
-            self, value, uc.LinearCombination({self: 1.0}))
+        uc.AffineScalarFunc.__init__(self, value, uc.LinearCombination({self: 1.0}))
         self.tag = tag
 
     # changes uncertainties.core.Variable.__init__
@@ -93,7 +93,7 @@ def _digits_exponent_std_dev(std_dev: float) -> tuple[int, int, float]:
 
         # calculate mantissa of std_dev
         # round to 3 digits to minimize machine epsilon
-        mantissa = round(std_dev * 10**(-exponent), 3)
+        mantissa = round(std_dev * 10 ** (-exponent), 3)
 
         # significant digits to consider for rounding
         sig_digits = 1

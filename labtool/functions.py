@@ -2,26 +2,31 @@
 
 # dunders
 __author__ = "Andreas Zach"
-__all__ = ["cd", "plt_latex", "pd_format",
-           "write_table", "profile", "tracer",
-           "plt_uplot", "separate_uarray", "integrate"]
+__all__ = [
+    "cd",
+    "plt_latex",
+    "pd_format",
+    "write_table",
+    "profile",
+    "tracer",
+    "plt_uplot",
+    "separate_uarray",
+    "integrate",
+]
 
 # std library
 from cProfile import Profile
 from os import chdir, path
 from pstats import Stats, SortKey
 from re import sub
-from typing import Callable, Union, Any
+from typing import Callable, Union, Sequence
 
 # 3rd party
 from matplotlib import rcParams
 from matplotlib.pyplot import errorbar, fill_between, plot
 from numpy import array, ndarray
-from numpy.typing import ArrayLike
 from pandas import DataFrame, options
 from scipy.integrate import trapezoid
-
-DataFrameLike = UArrayLike = ItDepends = Any
 
 
 def cd() -> None:
@@ -32,14 +37,16 @@ def cd() -> None:
 
 def plt_latex() -> None:
     """Use LaTeX as text processor for matplotlib, set figsize for a textwidth of 15 cm"""
-    cm = 1/2.54  # conversion factor inch to cm
-    rcParams.update({
-        "text.usetex": True,
-        "text.latex.preamble": r"\usepackage{lmodern}\usepackage{siunitx}",
-        "font.family": "Latin Modern Roman",
-        "figure.figsize": (15*cm, 9*cm),  # 15:9 relation
-        "figure.autolayout": True,  # auto tight_layout()
-    })
+    cm = 1 / 2.54  # conversion factor inch to cm
+    rcParams.update(
+        {
+            "text.usetex": True,
+            "text.latex.preamble": r"\usepackage{lmodern}\usepackage{siunitx}",
+            "font.family": "Latin Modern Roman",
+            "figure.figsize": (15 * cm, 9 * cm),  # 15:9 relation
+            "figure.autolayout": True,  # auto tight_layout()
+        }
+    )
     return None
 
 
@@ -49,19 +56,20 @@ def pd_format(format_spec: str) -> None:
     return None
 
 
-def write_table(content: DataFrameLike,
-                path: str,
-                environ: str = "tblr",
-                colspec: Union[str, list[str]] = "",
-                inner_settings: list[str] = [],
-                columns: Union[bool, list[str]] = False,
-                index: bool = False,
-                format_spec: Union[None, str] = None,
-                uarray: bool = False,
-                sisetup: list[str] = [],
-                hlines_old: bool = False,
-                msg: bool = False
-                ) -> str:
+def write_table(
+    content: Sequence,
+    path: str,
+    environ: str = "tblr",
+    colspec: Union[str, list[str]] = "",
+    inner_settings: list[str] = [],
+    columns: Union[bool, list[str]] = False,
+    index: bool = False,
+    format_spec: Union[None, str] = None,
+    uarray: bool = False,
+    sisetup: list[str] = [],
+    hlines_old: bool = False,
+    msg: bool = False,
+) -> str:
     """Create a tex-file with a correctly formatted table for LaTeX-package 'tabularray' from the given
     input content. Return the created string.
 
@@ -115,8 +123,7 @@ def write_table(content: DataFrameLike,
         else:
             # check if right amount of column labels was provided
             if len(columns) != len(df.columns):
-                raise IndexError(
-                    "'content' had a different amount of columns than provided 'columns'")
+                raise IndexError("'content' had a different amount of columns than provided 'columns'")
             else:
                 # update columns of DataFrame
                 df.columns = columns  # type: ignore
@@ -134,25 +141,27 @@ def write_table(content: DataFrameLike,
     sisetup_str = ", ".join(sisetup)
     inner_settings_str = ",\n".join(inner_settings)
     hlines_str = "\\hline" if hlines_old else ""
-    df_str: str = df.to_csv(sep="&", line_terminator=f"\\\\{hlines_str}\n",  # to_csv without path returns string
-                            float_format=formatter, header=columns, index=index)  # type: ignore
+    df_str: str = df.to_csv(
+        sep="&",
+        line_terminator=f"\\\\{hlines_str}\n",  # to_csv without path returns string
+        float_format=formatter,  # type: ignore
+        header=columns,
+        index=index,
+    )  # type: ignore
 
     if uarray:
         # delete string quotes
-        df_str = df_str.replace('"', '')
+        df_str = df_str.replace('"', "")
 
         # replace +/- with +-
         df_str = sub(r"(\d)\+/-(\d)", r"\1 +- \2", df_str)
 
         # delete parantheses and make extra spaces if exponents
-        df_str = sub(r"\((\d+\.?\d*) \+- (\d+\.?\d*)\)e",
-                     r"\1 +- \2 e", df_str)
+        df_str = sub(r"\((\d+\.?\d*) \+- (\d+\.?\d*)\)e", r"\1 +- \2 e", df_str)
 
     # create complete string
     complete_str = f"\\sisetup{{{sisetup_str}}}\n\n" if sisetup_str else ""
-    complete_str += (f"\\begin{{{environ}}}{{{inner_settings_str}}}{hlines_str}\n"
-                     f"{df_str}"
-                     f"\\end{{{environ}}}")
+    complete_str += f"\\begin{{{environ}}}{{{inner_settings_str}}}{hlines_str}\n" f"{df_str}" f"\\end{{{environ}}}"
 
     # write to file if path provided
     if path:
@@ -165,9 +174,11 @@ def write_table(content: DataFrameLike,
         # pd.options
         options.display.float_format = formatter
 
-        print(f"Wrote pandas.DataFrame\n\n{df}\n\n"
-              f"as tabularray environment '{environ}' to file '{path}'\n\n\n"
-              f"output:\n\n{complete_str}")
+        print(
+            f"Wrote pandas.DataFrame\n\n{df}\n\n"
+            f"as tabularray environment '{environ}' to file '{path}'\n\n\n"
+            f"output:\n\n{complete_str}"
+        )
 
     return complete_str
 
@@ -175,7 +186,7 @@ def write_table(content: DataFrameLike,
 def profile(func: Callable) -> Callable:
     """A decorator for profiling a certain function call"""
 
-    def decorator(*args, **kwargs):
+    def decorator(*args, **kwargs) -> None:
         with Profile() as pr:
             func(*args, **kwargs)
         stats = Stats(pr)
@@ -186,11 +197,11 @@ def profile(func: Callable) -> Callable:
     return decorator
 
 
-def tracer(frame, event, arg):
+def tracer(frame, event, arg) -> None:
     """Copy from StackOverflow"""
     indent = [0]
 
-    def list_arguments():
+    def list_arguments() -> None:
         try:
             for i in range(frame.f_code.co_argcount):
                 name = frame.f_code.co_varnames[i]
@@ -212,13 +223,14 @@ def tracer(frame, event, arg):
         pass
 
 
-def plt_uplot(x: ArrayLike,
-              y: ArrayLike,
-              *args,
-              band: bool = True,
-              kwfill: dict = {},
-              **kwargs,
-              ) -> ItDepends:
+def plt_uplot(
+    x: Sequence,
+    y: Sequence,
+    *args,
+    band: bool = True,
+    kwfill: dict = {},
+    **kwargs,
+):
     """Take two uncertainties.unumpy.uarrays as input and plot them with matplotlib.pyplot.plot.
     Return the return value of either pyplot.fill_between or pyplot.errorbar
 
@@ -233,49 +245,53 @@ def plt_uplot(x: ArrayLike,
     try:
         x_n, x_s = separate_uarray(x)
     except AttributeError:
-        x_n, x_s = array(x), 0
+        x_n, x_s = array(x), 0  # type: ignore
 
     try:
         y_n, y_s = separate_uarray(y)
     except AttributeError:
-        y_n, y_s = array(y), 0
+        y_n, y_s = array(y), 0  # type: ignore
 
     if band:
-        kwargs.update({
-            "linewidth": kwargs.get("linewidth", 1.0),
-        })
+        kwargs.update(
+            {
+                "linewidth": kwargs.get("linewidth", 1.0),
+            }
+        )
 
         ret_plot = plot(x_n, y_n, *args, **kwargs)
 
-        kwfill.update({
-            "alpha": kwfill.get("alpha", 0.6),
-        })
+        kwfill.update(
+            {
+                "alpha": kwfill.get("alpha", 0.6),
+            }
+        )
 
-        ret_fill = fill_between(x=x_n,
-                                y1=y_n-y_s,  # type: ignore
-                                y2=y_n+y_s,
-                                **kwfill)
+        ret_fill = fill_between(x=x_n, y1=y_n - y_s, y2=y_n + y_s, **kwfill)  # type: ignore
 
         return ret_plot, ret_fill
     else:
-        kwargs.update({
-            "capsize": kwargs.get("capsize", 2),
-        })
+        kwargs.update(
+            {
+                "capsize": kwargs.get("capsize", 2),
+            }
+        )
         return errorbar(x_n, y_n, xerr=x_s, yerr=y_s, *args, **kwargs)
 
 
-def separate_uarray(uarr: UArrayLike) -> tuple[ndarray, ndarray]:
+def separate_uarray(uarr: Sequence) -> tuple[ndarray, ndarray]:
     """Seperate an uncertainties.unumpy.uarray in n and s parts."""
     n = array([x.n for x in uarr])
     s = array([x.s for x in uarr])
     return n, s
 
 
-def integrate(x: ArrayLike,
-              y: ArrayLike,
-              start: int = 0,
-              stop: int = -1,
-              ) -> float:
+def integrate(
+    x: Sequence,
+    y: Sequence,
+    start: int = 0,
+    stop: int = -1,
+) -> float:
     """Numerically integrate a given array with specified boundaries
 
     Paramters:

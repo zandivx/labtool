@@ -1,3 +1,0 @@
-confic.cfg
-pyproject.toml
-README.md
