@@ -508,7 +508,7 @@ class StudentArray:
             self.raw_data = DataFrame({i: v for i, v in enumerate(series)})  # type: ignore
 
         # create uarray
-        students = self.raw_data.apply(lambda x: Student(x, sigma), axis=1)
+        students = self.raw_data.apply(lambda x: Student(x, sigma), axis=1)  # type: ignore
         self.array = array([x.mean for x in students])  # type: ignore
 
         # create n and s arrays

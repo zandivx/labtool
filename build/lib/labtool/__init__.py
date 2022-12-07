@@ -5,7 +5,6 @@ GitHub: https://github.com/zandivx/labtool
 
 # dunders
 __author__ = "Andreas Zach"
-__version__ = "1.0"
 
 try:
     # 3rd party library imports
@@ -22,7 +21,7 @@ else:
     # own library imports
     from .classes import *
     from .functions import *
-    import monkeypatch_uncertainties
+    from .monkeypatch_uncertainties import display
 
     # define __all__
     from .classes import __all__ as cls_all
@@ -31,5 +30,5 @@ else:
     __all__ = sorted(cls_all + func_all + ["np", "pd", "plt", "u", "unp"])  # type: ignore
     del cls_all, func_all
 
-    # apply one monkey patch
-    monkeypatch_uncertainties.display()
+    # apply monkey patch
+    display()

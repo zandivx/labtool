@@ -41,7 +41,7 @@ def plt_latex() -> None:
     rcParams.update(
         {
             "text.usetex": True,
-            "text.latex.preamble": r"\usepackage{lmodern}\usepackage{siunitx}",
+            "text.latex.preamble": r"\usepackage{lmodern}\usepackage[locale=DE,uncertainty-mode=separate]{siunitx}",
             "font.family": "Latin Modern Roman",
             "figure.figsize": (15 * cm, 9 * cm),  # 15:9 relation
             "figure.autolayout": True,  # auto tight_layout()
@@ -52,7 +52,7 @@ def plt_latex() -> None:
 
 def pd_format(format_spec: str) -> None:
     """Update float-formatting of pandas.DataFrame."""
-    options.display.float_format = f"{{:{format_spec}}}".format
+    options.display.float_format = f"{{:{format_spec}}}".format  # type: ignore
     return None
 
 
@@ -172,7 +172,7 @@ def write_table(
     # message printing
     if msg:
         # pd.options
-        options.display.float_format = formatter
+        options.display.float_format = formatter  # type: ignore
 
         print(
             f"Wrote pandas.DataFrame\n\n{df}\n\n"
