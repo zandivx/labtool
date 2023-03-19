@@ -6,7 +6,7 @@ __all__ = ["CDContxt", "CurveFit", "Interpolate", "Student", "StudentArray"]
 
 # std library
 from os import chdir, getcwd
-from typing import Callable, Union
+from typing import Any, Callable, Union
 
 # 3rd party
 from matplotlib import pyplot as plt
@@ -418,7 +418,6 @@ class Student:
         -> mean
         -> _n
         -> _s
-        -> _factor_used
 
         Methods:
         -> save
@@ -443,25 +442,22 @@ class Student:
         self._n = mean(self.series)
 
         # precise s (no rounding by uncertainties)
-        self._s = sem(self.series)
+        self._s = sem(self.series) * self.t
 
         # ufloat mean (rounded by uncertainties)
         # with .n and .s for convenience
-        self.mean = ufloat(self._n, self.t * self._s)
+        self.mean = ufloat(self._n, self._s)
         self.n = self.mean.n
         self.s = self.mean.s
 
-        # check if t is neglibible
-        self._factor_used = True if self.s != self._s else False
-
     def __str__(self) -> str:
-        ret = (
-            f"Student-t distribution\n\n"
-            f"t-factor:\n\t{self.t if self._factor_used else 'unused'}\n"
-            f"ufloat:\n\t{self.mean}\n"
-            f"precisely:\n\t{self._n}+/-{self._s}"
+        string = (
+            f"Student-t distribution\n"
+            f"ufloat:\t\t{self.mean}\n"
+            f"precisely:\t{self._n}+/-{self._s}\n"
+            f"t-factor:\t{self.t}"
         )
-        return ret
+        return string
 
     def __repr__(self) -> str:
         return f"<Student({self.mean},t={self.t})>"
@@ -469,16 +465,8 @@ class Student:
     def __len__(self) -> int:
         return len(self.series)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Any:
         return self.series[key]
-
-    def save(self, path: str) -> None:
-        """Save Student-t data to a file"""
-
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(str(self))
-
-        return None
 
 
 class StudentArray:
