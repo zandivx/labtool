@@ -77,7 +77,7 @@ def undo() -> None:
 
 
 def _digits_exponent_std_dev(std_dev: float) -> tuple[int, int, float]:
-    """Find the amount of significant digits the exponent of those digits to the base 10.
+    """Find the amount of significant digits and the exponent of those digits to the base 10.
     Also return the effective standard deviation.
 
     Provide data needed by function 'display' (subfunction 'EPM_precision') and
@@ -103,6 +103,8 @@ def _digits_exponent_std_dev(std_dev: float) -> tuple[int, int, float]:
             sig_digits += 1
             exponent -= 1
             mantissa *= 10
+        elif mantissa > 9:
+            sig_digits += 1
 
         # round up according to significant digits
         s = ceil(mantissa) * 10**exponent
