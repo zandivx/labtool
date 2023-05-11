@@ -58,13 +58,16 @@ def main() -> None:
     test = lt.u.ufloat(test_n, test_s)
     print(test)
 
-    lt.monkeypatch_uncertainties.init()
+    # lt.monkeypatch_uncertainties.init()
 
     print(lt.u.ufloat(3.24323, 0.12).n)
     print(lt.u.ufloat(3.24323, 0.22).n)
     print(lt.u.ufloat(3.24323, 0.92).n)
     print(lt.u.ufloat(3.24323, 0.9).n)
     print(lt.u.ufloat(3.24323, 0.092).n)
+
+    print("Example from Max:")
+    print(lt.u.ufloat(1.911855e-10, 9.257050e-12))
 
 
 if __name__ == "__main__":
